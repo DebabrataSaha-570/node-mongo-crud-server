@@ -10,12 +10,42 @@ const port = process.env.PORT || 5000;
 
 const uri = "mongodb+srv://mydbuser1:6FX4jadT6yO8fpGn@cluster0.imkxn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
-client.connect(err => {
-    const collection = client.db("test").collection("devices");
-    // perform actions on the collection object
-    client.close();
-});
 
+// .......................using normal ways 
+// client.connect(err => {
+//     const collection = client.db("NewDBUser").collection("users");
+
+//     console.log('hitting the data base')
+//     console.log(err)
+//     const user = { name: 'Mahiya mahi', email: 'mahi@gmail.com', phone: '018349348535' }
+//     collection.insertOne(user)
+//         .then(() => {
+//             console.log('insert success')
+//         })
+
+//     // client.close();
+// });
+
+
+// ............using async await like in the node documentation. (It is recommended to use like documentation )
+
+async function run() {
+    try {
+        await client.connect();
+        const database = client.db("NewDBUser");
+        const usersCollection = database.collection("users");
+        // create a document to insert
+        const doc = {
+            name: "Special One",
+            email: "specail@hotmail.com",
+        }
+        const result = await usersCollection.insertOne(doc);
+        console.log(`A document was inserted with the _id: ${result.insertedId}`);
+    } finally {
+        await client.close();
+    }
+}
+run().catch(console.dir);
 
 app.get('/', (req, res) => {
     res.send('Running my crud server')
