@@ -1,6 +1,10 @@
 const express = require('express')
+const cors = require('cors')
+
 const { MongoClient } = require('mongodb');
 const app = express()
+app.use(cors())
+app.use(express.json())
 const port = process.env.PORT || 5000;
 
 //user : mydbuser1
@@ -29,20 +33,43 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 
 // ............using async await like in the node documentation. (It is recommended to use like documentation )
 
+// async function run() {
+//     try {
+//         await client.connect();
+//         const database = client.db("NewDBUser");
+//         const usersCollection = database.collection("users");
+//         // create a document to insert
+//         const doc = {
+//             name: "Special One",
+//             email: "specail@hotmail.com",
+//         }
+//         const result = await usersCollection.insertOne(doc);
+//         console.log(`A document was inserted with the _id: ${result.insertedId}`);
+//     } finally {
+//         await client.close();
+//     }
+// }
+// run().catch(console.dir);
+
+// ............
+
 async function run() {
     try {
         await client.connect();
         const database = client.db("NewDBUser");
         const usersCollection = database.collection("users");
-        // create a document to insert
-        const doc = {
-            name: "Special One",
-            email: "specail@hotmail.com",
-        }
-        const result = await usersCollection.insertOne(doc);
-        console.log(`A document was inserted with the _id: ${result.insertedId}`);
+
+        //POST API
+        app.post('/users', async (req, res) => {
+            const newUser = req.body;
+            const result = await usersCollection.insertOne(newUser)
+            console.log(`A document was inserted with the _id: ${result.insertedId}`);
+            // console.log('hitting the post', req.body)
+            res.json(result)
+
+        })
     } finally {
-        await client.close();
+        // await client.close();
     }
 }
 run().catch(console.dir);
