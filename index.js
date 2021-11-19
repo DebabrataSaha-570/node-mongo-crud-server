@@ -78,6 +78,16 @@ async function run() {
 
         })
 
+        //update API
+        app.get('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log('load users with id ', id)
+            const query = { _id: ObjectId(id) }
+            const result = await usersCollection.findOne(query)
+            console.log(result)
+            res.send(result)
+        })
+
         //delete API
         app.delete('/users/:id', async (req, res) => {
             const id = req.params.id;
