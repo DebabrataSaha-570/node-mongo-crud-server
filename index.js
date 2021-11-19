@@ -59,6 +59,15 @@ async function run() {
         const database = client.db("NewDBUser");
         const usersCollection = database.collection("users");
 
+        //get API
+        app.get('/users', async (req, res) => {
+            const cursor = usersCollection.find({})
+            const users = await cursor.toArray()
+            res.send(users)
+
+        })
+
+
         //POST API
         app.post('/users', async (req, res) => {
             const newUser = req.body;
