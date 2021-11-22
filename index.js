@@ -10,9 +10,10 @@ const port = process.env.PORT || 5000;
 //user : mydbuser1
 //password: 6FX4jadT6yO8fpGn
 
+//user : mydbuser
+//password: JY6qvQYttl7NzLek
 
-
-const uri = "mongodb+srv://mydbuser1:6FX4jadT6yO8fpGn@cluster0.imkxn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
+const uri = "mongodb+srv://mydbuser:JY6qvQYttl7NzLek@cluster0.imkxn.mongodb.net/myFirstDatabase?retryWrites=true&w=majority";
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 
 // .......................using normal ways 
@@ -60,6 +61,7 @@ async function run() {
         const usersCollection = database.collection("users");
 
         //get API
+        //all data loading
         app.get('/users', async (req, res) => {
             const cursor = usersCollection.find({})
             const users = await cursor.toArray()
@@ -67,7 +69,15 @@ async function run() {
 
         })
 
-
+        //specefic data loading 
+        app.get('/users/:id', async (req, res) => {
+            const id = req.params.id;
+            console.log('load users with id ', id)
+            const query = { _id: ObjectId(id) }
+            const result = await usersCollection.findOne(query)
+            // console.log(result)
+            res.send(result)
+        })
         //POST API
         app.post('/users', async (req, res) => {
             const newUser = req.body;
@@ -79,13 +89,26 @@ async function run() {
         })
 
         //update API
-        app.get('/users/:id', async (req, res) => {
-            const id = req.params.id;
-            console.log('load users with id ', id)
-            const query = { _id: ObjectId(id) }
-            const result = await usersCollection.findOne(query)
-            console.log(result)
-            res.send(result)
+        app.put('/users/:id', async (req, res) => {
+            const id = req.params.id
+            console.log('updating user', id)
+            console.log(req.body)
+            const updatedUser = req.body
+            const filter = { _id: ObjectId(id) }
+            const options = { upsert: true };
+            const updateDoc = {
+                $set: {
+                    name: updatedUser.name,
+                    email: updatedUser.email
+                },
+            };
+            const result = await usersCollection.updateOne(filter, updateDoc, options);
+            console.log(
+                `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
+            );
+
+            res.json(result)
+
         })
 
         //delete API
